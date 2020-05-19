@@ -13,7 +13,7 @@ import com.wallet.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-	@AutoWride
+	@Autowired
 	UserRepository repository;
 	
 	@Override

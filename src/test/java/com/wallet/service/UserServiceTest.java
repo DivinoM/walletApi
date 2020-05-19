@@ -18,9 +18,9 @@ import com.wallet.entity.User;
 import com.wallet.repository.UserRepository;
 
 
-@Runwith@SpringRunner.Class)
+@RunWith@SpringRunner.Class)
 @SpringBootTest
-@ActiveProfile("test")
+@ActiveProfiles("test")
 public class UserServiceTest {
 	
 	@MockBean
