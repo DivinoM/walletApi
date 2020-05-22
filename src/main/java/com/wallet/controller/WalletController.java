@@ -2,6 +2,7 @@ package com.wallet.controller;
 
 import javax.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,18 +25,18 @@ public class WalletController {
 	private WalletService service;
 	@PostMapping
 	
-public ResponseEntity<Response<Wallet>> create(@Valid @RequestBody WalletDto dto,BindingResult result){
+public ResponseEntity<Response<WalletDto>> create(@Valid @RequestBody WalletDto dto,BindingResult result){
 	Response<WalletDto> response = new Response<WalletDto>();
 		if(result.hasErrors()) {
 		
-			result.getAllErrors().forEach(r -> response.getErrors().add(r.getDefaultMessage()))
+			result.getAllErrors().forEach(r -> response.getErrors().add(r.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
 		
 		Wallet w =service.save(this.convertDtoEntity(dto));
 		response.setData(this.convertToDtoEntity(w));
 		
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 		
 	}
 		private Wallet convertDtoEntity(WalletDto dto) {
