@@ -1,7 +1,7 @@
 package com.wallet.controller;
 
 
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
@@ -9,44 +9,34 @@ import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder; 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wallet.dto.UserDTO;
 import com.wallet.entity.User;
 import com.wallet.service.UserService;
-
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import com.wallet.util.enums.RoleEnum;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class UserControllerTest {
-
-	private static final String EMAIL="email@email.com";
-	private static final String NAME="User Teste";
-	private static final String PASSWORD ="123456";
-	private static final String URL ="/user";
-	private static final Long ID =1L;
+	
+	private static final Long ID = 1L;
+	private static final String EMAIL = "email@teste.com";
+	private static final String NAME = "User Test";
+	private static final String PASSWORD = "123456";
+	private static final String URL = "/user";
+	
 	@MockBean
 	UserService service;
 	
@@ -54,59 +44,53 @@ public class UserControllerTest {
 	MockMvc mvc;
 	
 	@Test
-	public void testsave() throws Exception {
+	public void testSave() throws Exception {
 		
 		BDDMockito.given(service.save(Mockito.any(User.class))).willReturn(getMockUser());
 		
-		mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayLoad(ID,EMAIL,NAME,PASSWORD))
+		mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayload(ID, EMAIL, NAME, PASSWORD))
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))	
-				.andExpect(status().isCreated())
-				.andExpect(jasonPath("$.data.id").value(ID))
-				.andExpect(jasonPath("$.data.email").value(EMAIL))
-				.andExpect(jasonPath("$.data.name").value(NAME))
-				.andExpect(jasonPath("$.data.password").doesNotExists()));
-
-		
+				.accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isCreated())
+		.andExpect(jsonPath("$.data.id").value(ID))
+		.andExpect(jsonPath("$.data.email").value(EMAIL))
+		.andExpect(jsonPath("$.data.name").value(NAME))
+		.andExpect(jsonPath("$.data.role").value(RoleEnum.ROLE_ADMIN.toString()))
+		.andExpect(jsonPath("$.data.password").doesNotExist());
 		
 	}
+	
 	@Test
-	public void testeSaveInvaldUser() {
+	public void testSaveInvalidUser() throws JsonProcessingException, Exception {
 		
-		mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayLoad(ID,"email",NAME,PASSWORD))
+		mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayload(ID, "email", NAME, PASSWORD))
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))	
-				.andExpect(status().isBadRequest())
-				.andExpect(jasonPath("$.erros").value("E-mail Invalido"));
+				.accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errors[0]").value("Email inválido"));
 		
 	}
 	
-	private Object jasonPath(String string) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public User getMockUser() {
-	User u= new User();
-	u.setid(ID);
-	u.setemail(EMAIL);
-	u.setnome(NAME);
-	u.setpassword(PASSWORD);
-	
-	return u;
+		User u = new User();
+		u.setId(ID);
+		u.setEmail(EMAIL);
+		u.setName(NAME);
+		u.setPassword(PASSWORD);
+		u.setRole(RoleEnum.ROLE_ADMIN);
+		
+		return u;
 	}
 	
-	public String getJsonPayLoad(Long id, String name,String email,String password) throws JsonProcessingException {
+	public String getJsonPayload(Long id, String email, String name, String password) throws JsonProcessingException {
 		UserDTO dto = new UserDTO();
 		dto.setId(id);
 		dto.setEmail(email);
 		dto.setName(name);
 		dto.setPassword(password);
+		dto.setRole(RoleEnum.ROLE_ADMIN.toString());
 		
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.writeValueAsString(dto);
-		
 	}
-	
-	
 }

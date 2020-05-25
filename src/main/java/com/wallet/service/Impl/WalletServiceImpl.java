@@ -1,21 +1,22 @@
 package com.wallet.service.Impl;
 
-import com.wallet.entity.Wallet;
-import com.wallet.repository.WalletReporsitory;
-import com.wallet.service.WalletService;
-import com.wallet.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wallet.entity.Wallet;
+import com.wallet.repository.WalletRepository;
+import com.wallet.service.WalletService;
+
 @Service
-public class WalletServiceImpl implements WalletService {
+public class WalletServiceImpl implements WalletService{
 
 	@Autowired
-	private WalletReporsitory repository;
+	private WalletRepository repository;
 	
+	@Override
 	public Wallet save(Wallet w) {
-		
+		// TODO Auto-generated method stub
 		return repository.save(w);
 	}
+
 }

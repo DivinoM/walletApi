@@ -1,5 +1,6 @@
 package com.wallet.controller;
 
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.wallet.entity.User;
 import com.wallet.response.Response;
 import com.wallet.service.UserService;
 import com.wallet.util.Bcrypt;
+import com.wallet.util.enums.RoleEnum;
 
 @RestController
 @RequestMapping("user")
@@ -25,43 +27,40 @@ public class UserController {
 	private UserService service;
 	
 	@PostMapping
-	public ResponseEntity<Response<UserDTO>> create(@Valid @RequestBody UserDTO dto, BindingResult result){
-
+	public ResponseEntity<Response<UserDTO>> create(@Valid @RequestBody UserDTO dto, BindingResult result) {
+		
 		Response<UserDTO> response = new Response<UserDTO>();
 		
-		if(result.hasErrors()) {
-			result.getAllErrors().forEach(e -> response.getErrors().add(e.getDefaultMessage()));;
+		if (result.hasErrors()) {
+			result.getAllErrors().forEach(e -> response.getErrors().add(e.getDefaultMessage()));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-			
 		}
-		User user = service.save(this.convertDTOtoEntity(dto));
 		
-		Response.setData(this.convertEntityTODto(user));
+		User user = service.save(this.convertDtoToEntity(dto));
 		
+		response.setData(this.convertEntityToDto(user));
 		
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 	
-	private User convertDTOtoEntity(UserDTO dto) {
-		
+	private User convertDtoToEntity(UserDTO dto) {
 		User u = new User();
-		u.setid(dto.getId());
-		u.setemail(dto.getEmail());
-		u.setnome(dto.getnome);
-		u.setpassword(Bcrypt.getHash(dto.getPassword));
-
-		return u;
+		u.setId(dto.getId());
+		u.setEmail(dto.getEmail());
+		u.setName(dto.getName());
+		u.setPassword(Bcrypt.getHash(dto.getPassword()));
+		u.setRole(RoleEnum.valueOf(dto.getRole()));
 		
+		return u;
 	}
 	
-	private UserDTO convertEntityTODto(User u) {
+	private UserDTO convertEntityToDto(User u) {
 		UserDTO dto = new UserDTO();
 		dto.setId(u.getId());
-		dto.setemail(u.getemail());
-		dto.setnome(u.getnome());
+		dto.setEmail(u.getEmail());
+		dto.setName(u.getName());
+		dto.setRole(u.getRole().toString());
 		
 		return dto;
-		
-	}
-	
+	}	
 }

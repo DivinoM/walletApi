@@ -11,7 +11,12 @@ import static org.junit.Assert.assertNotNull;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.Optional;
 
+import javax.validation.ConstraintViolation;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
 
 
@@ -28,14 +33,74 @@ public class WalletItemRepositoryTest {
 	private static final String TYPE = "EN";
 	private static final String DESCRIPTION = "Conta de Luz";
 	private static final BigDecimal VALUE = BigDecimal.valueOf(65);
+	private Long saveWalletItemId;
+	private Long saveWalletid;
 	
 	
 	@Autowired
-	WalletItemRepositoryTest repositoy;
+	WalletItemRepositoryTest repository;
 	@Autowired
 	WalletRepository walletrepository;
 	
 	
+	@Before
+	public void setUp() {
+		Wallet w = new Wallet();
+		w.setName ("Carteira teste");
+		w.setvalue(BigDecimal.valueOf(250));
+		walletrepository.save(w);
+		
+	    WalletItem wi =new WalletItem(1L,w, DATE, TYPE,DESCRIPTION,VALUE);
+		
+		WalletItem response = repository.save(wi);
+		
+		saveWalletItemId = wi.getId();
+		saveWalletid = w.getId();
+		
+	}
+	@After
+	public void tearDown() {
+		repository.deleteAll();
+		walletrepository.deleteAll();
+	}
+	
+	@Test(expected = ConstraintViolation.Class)
+	public void testInvalidaWalletItem() {
+		 WalletItem wi =new WalletItem(null,null, DATE, null,DESCRIPTION,null);
+		 repository.save(wi);
+	}
+	
+	@Test
+	public void testUpdate() {
+		Optional<WalletItem> wi = repository.findById(saveWalletitemId);
+		
+		String desciption = "Descrição Alterada";
+		
+		WalletItem change =wi.get();
+		change.setDescription(description);
+		
+		repository.save(change);
+		
+		Optional<WalletItem> newWalletItem = repository.findById(saveWalletitemId);
+		 assertEquals(desciption,newWalletItem.get().getDescription());
+	}
+	
+	
+	@Test
+	public void deletewalletItem() {
+		Optional<WalletItem> wi = repository.findById(saveWalletitemId);
+		WalletItem wi =new WalletItem(null,wallet.get(), DATE, TYPE,DESCRIPTION,VALUE);
+		repository.save(wi);
+		
+		repository.deleteById(wi.getId());
+		
+		
+		
+		Optional<WalletItem> newWalletItem = repository.findById(wi.getId());
+	
+		assertFalse(response.IsPresent());
+		
+	}
 	
 	@Test
 	public void testSave() {

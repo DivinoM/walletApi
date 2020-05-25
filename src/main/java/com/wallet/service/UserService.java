@@ -5,7 +5,8 @@ import java.util.Optional;
 import com.wallet.entity.User;
 
 public interface UserService {
+
 	User save(User u);
-	Optional<User> findByEmail(String email);
 	
+	Optional<User> findByEmail(String email);
 }
